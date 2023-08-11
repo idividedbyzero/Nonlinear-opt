@@ -1,0 +1,207 @@
+\documentclass[a4paper,10pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{mathrsfs}
+\usepackage{graphicx}
+
+\title{NLOG}
+\author{Oliver Heinzel}
+\date{16.10.2018}
+
+\begin{document}
+\subsection*{5.2 Powell-Wolfe-Schrittweiten}
+\textbf{Powell-Wolfe-Schrittweiten}
+Bestimme $\sigma_k>0$ mit:
+\begin{enumerate}
+\item Armijo: $f(x_k+\sigma_k s_k)-f(x_k)\leq \sigma_k \gamma \nabla f(x_k)^ts_k$
+\item zstzl: $\nabla f(x_k+\sigma_k s_k)^ts_k\geq \eta \nabla f(x_k)^ts_k$
+\end{enumerate}
+mit $0<\gamma <\frac{1}{2}$ und $\gamma<\eta <1$
+
+
+
+
+\textbf{Lemma 5.2.1}
+Sei $f\in C^1(\mathbb{R}^n)$ und $x,s\in \mathbb{R}^n$ , s Abstiegsrichtung von f in x,entlang der f nach unten beschränkt ist,d.h  
+\begin{equation}
+\inf_{t\geq 0}f(x+ts) \geq -\infty
+\end{equation}
+.Weiter seien $\gamma \in (0,\frac{1}{2})$  und $\eta \in (\gamma,1)$  gegeben. $\exists \sigma >0$, die die Powell-wolfe Bedingung erfüllt.
+\\
+\\
+\textbf{Implementierung des Powell-Wolfe-Schrittweitenregels}\\
+\begin{enumerate}
+\item  Falls $\sigma=1$ die Armijo Bedingugng erfüllt ist gehe zu 3.
+\item  Bestimmedie größte Zahl $\sigma_{-}\in \{2^-{-1},2^{-1},...\}$  so dass $\sigma=\sigma_{-}$  die Armijo-Bedingung erfüllt. Setze $\sigma_{+}=\sigma_{-}$  und gehe zu Schritt 5.
+\item  Falls $\sigma=1$ die zstzl. Bedingung erfüllt, Stop und return $\sigma=1$
+\item Bestimme kleinste Zahl $\sigma_{+}\in \{2,2^2,2^3,...\}$,sodass die Armiijo Bedingung für $\sigma=\sigma_{+}$ verletzt ist. Setze $\sigma=\frac{\sigma_{-}}{2}$.
+\item Solange die zusätzl. Bedingung verletzt ist, berechne $\sigma=\frac{\sigma_{-}+\sigma_{+}}{2}$ und falls $\sigma$ der zusätzl. Bedinung genügt setze $\sigma_{-}=\sigma$ sonst $\sigma_{+}=\sigma$
+\item Stop mit $\sigma=\sigma_{-}$
+\end{enumerate}
+
+\textbf{Satz 5.2.2}
+Sei $f\in C^1(\mathbb{R}^n)$ und f entlang s in x nach unten beschränkt. Dann terminiert der Alg. für die Impementierung von Powell-Wolfe nach endlich vielen Schritten mit einem $\sigma >0$ die die Powell-Wolfebedingungen erfüllt.
+
+\textbf{Satz 5.2.3}
+Sei $f\in C^1(\mathbb{R}^n)$, $x_0\in \mathbb{R}^n$ so dass $N_f(x_0)$ kompakt ist. Beim Allgemeinen Abstiegsverfahren verwende man die Powell-Wolfe Schritteweite. Dann ist der Algorithmus durchführbar und jede Schrittweite $\sigma_k$ ist zulässig.
+
+\section*{6 Das Newton-Verfahren}
+\textbf{Lokales Newton-Verfahren für Gleichungssysteme}
+\begin{itemize}
+\item Wähle $x_0\in \mathbb{R}^n$. Für k=0,1,... Do
+\item Stop falls $F(x_k)=0$
+\item Bestimme Lösung der Newtongleichung: $F'(x_k)s_k=-F(x_k)$
+\item Setze $x_{k+1}=x_k+s_k$
+\end{itemize}
+
+\subsection{Schnelle Konvergenz des Newton-Verfahrens}
+\textbf{Konvergenzraten}
+Die Folge $x_k$ in $\mathbb{R}^n$ konvergiert
+\begin{itemize}
+\item q-linear mit Rate $0<\gamma<1$ gegen x, falls $\|x_{k+1}-x\|\leq \gamma \|x_k-x\|$ für hinreichend große k
+\item q-superlinear gegen x, falls $x_k\rightarrow x$ und $\dfrac{\|x_{k+1}-x\|}{\|x_k-x\|}\rightarrow 0$
+\item q-quadratisch gegen x, falls $x_k\rightarrow x$ und falls $\exists C>0:\|x_{k+1}-x\|\leq C\|x_k-x\|^2$
+\end{itemize}
+
+\textbf{Lemma von Banach}
+$GL_n(\mathbb{R})$ ist offen in $\mathbb{R}^{n,n}$ und $A\rightarrow A^{-1}$ stetig. Genauer: Sei $A\in GL_n(\mathbb{R}), B\in \mathbb{R}^{n,n}$ mit $\|A^{-1}B\|<1$, dann ist $A+B\in GL_n(\mathbb{R})$ und \begin{itemize}
+\item $\|(A+B)^{-1}\|\leq \dfrac{\|A^-1\|}{1-\|A^{-1}B\|}$
+\item $\|(A+B)^{-1}-A^{-1}\|\leq \dfrac{\|A^-1\| \|A^{-1}B\|}{1-\|A^{-1}B\|}$
+\end{itemize}
+
+\textbf{Lemma 6.1.2}\\
+Sei $F\in C^1(\mathbb{R}^n,\mathbb{R}^n)$. $\overline{x}$ eine Nullstelle und $F'(\overline{x})\in GL_n(\mathbb{R})$. Dann gibt es $\varepsilon>0, \gamma >0$ mit 
+\begin{equation}
+\|F(x)\| \geq \gamma \|x-\overline{x}\| \forall x\in B_{\varepsilon}(\overline{x})
+\end{equation}
+Insbesondere ist $\overline{x}$ eine isolierte Nullstelle von F.
+\\
+\\
+\textbf{Lokale Konvergenz des Newton-V für nichtlineare Gleichungen}\\
+Sei $F\in C^1(\mathbb{R}^n)$, $\overleftarrow{x} $ eine Nullstelle mit $F'(\overline{x})\in GL_n(\mathbb{R})$. Dann gibt es $\delta >0, C>0$:
+\begin{enumerate}
+\item $\overline{x}$ ist die einzige Nullstelle in $B_{\delta}(\overline{x})$
+\item $\|F(\overline{x})^{-1}\|\leq C$ für alle $x\in B_{\delta}(\overline{x})$
+\item Für alle $x_0\in B_{\delta}(\overline{x})$ terminiert das Neqton-Verfahren entweder mit $x_k=x$ oder erzeugt eine Folge in $B_{\delta}(\overline{x})$, die q-superlinear gegen $\overline{x}$ konvergiert
+\item Ist $F'$ sogar L-stetig auf $B_{\delta}(\overline{x})$, so ist die Konvergenzrate sogar q-quadratisch mit Rate $\dfrac{CL}{2}$
+\end{enumerate}
+
+\subsection{Das Newton-verfahren für Optimierungsprobleme}
+\textbf{Lokales Newton-Verfahren für Optimierungsprobleme}
+\begin{itemize}
+\item Wähle $x_0\in \mathbb{R}^n$. Für k=0,1,... Do
+\item Stop falls $\nabla f(x_k)=0$
+\item Bestimme Lösung der Newtongleichung: $\nabla^2f(x_k)s_k=-\nabla f(x_k)$
+\item Setze $x_{k+1}=x_k+s_k$
+\end{itemize}
+
+\textbf{Lemma}\\
+$A\in \mathbb{R}^{n,n}$ symmetrisch und positiv definit. Dann gilt für alle $\nu \in (0,\lambda_{min}(A))$ und alle symmetrische Matrizen $B\in \mathbb{R}^{n,n}$ mit $\|B\|\leq \lambda_{min}(A)-\nu$:
+\begin{center}
+$\lambda_{min}(A+B)\geq \nu$
+\end{center}
+\subsection{Globalisiertes Newtonverfahren}
+\textbf{Algorithmus GN}\\
+\begin{itemize}
+\item Wähle $x_0\in \mathbb{R}^n,\beta,\gamma \in (0,1), \alpha_{1,2},p>0$.  Für k=0,1,... Do
+\item Stop falls $\nabla f(x_k)=0$
+\item Bestimme $d_k$ durch lösen der NG $\nabla ^2f(x_k)d_k=-\nabla f(x_k)$. Ist dies möglich und erfüllt die Bedinung \begin{equation}
+-\nabla f(x_k)^td_k\geq min\{\alpha_1,\alpha_2\|d_k\|^p\}\|d_k\|^2
+\end{equation}
+so setze $s_k=d_k$, sonst setze $s_k=-\nabla f(x_k)$
+\item Bestimme die Schrittweite mit $\sigma_k>0$ mithilfe der Armijo-Regel
+\item Setze $x_{k+1}=x_k+\sigma_k s_k$
+\end{itemize}
+
+\textbf{Globaler Konvergenzsatz}
+Sei $f\in C^2(\mathbb{R}^n)$. Dann terminiert Alg. GN entweder mit $\nabla f(x_k)=0$ oder er erzeugt eine unendliche Folge $x_k$, deren Häufungspunkte stationäre Punkte von f sind.
+
+\subsection{Übergang zu schneller Konvergenz}
+\textbf{Lemma 10.11}\\
+Sei $\overline{x}$ ein isolierter HP der Folge $(x_k)$. Für jede gegen $\overline{x}$ konvergente Teilfolge $(x_k)_K$ gelte $(x_{k+1}-x_k)_K\rightarrow 0$. Dann konvergiert die gesamte Folge $(x_k)$ gegen $\overline{x}$.\\
+\\
+\textbf{Lemma 10.12}\\
+Sei $f\in C^2(\mathbb{R}^n)$. Alg. GN erzeuge eine Folge $(x_k)$ und $\overline{x}\in \mathbb{R}$ sei ein HP von $(x_k)$, in dem die Hesse-matrix positiv-definit ist. Dann ist $\overline{x}$ ein isoliertes lokales Minimum von f und die gesamte Folge $(x_k)$ konvergiert gegen $\overline{x}$.
+\\
+\\
+\textbf{Lemma 10.13}\\
+Sei $f\in C^2(\mathbb{R}^n)$ und $\overline{x}\in \mathbb{R}^n$ ein lokales Minimum von f, in dem die hinreichenden Bedingungen 2. Ordnung gelten. Weiter sei $\gamma\in (0,\dfrac{1}{2})$ gegeben. Dann gibt es $\varepsilon>0$, so dass für alle $x\in B_{\varepsilon}(\overline{x})\setminus \{\overline{x}\}$ gilt:
+\begin{itemize}
+\item Der Vektor $s=-\nabla^2 f(x)^-1\nabla f(x)$ ist eine Abstiegsrichtung von f in x.
+\item Die Armijo Bedingung ist für alle $\sigma\in (0,1]$ erfüllt.
+\end{itemize}
+
+\textbf{Satz 10.14}
+Sei $f\in C^2(\mathbb{R}^n)$. Alg (Globales Newtonverfahren) erzeugt eine Folge $(x_k)$ und sei $\overline{x}$ eine Häufungspunkt in der die Hesse matrix positiv definit ist. Dann gilt:
+\begin{itemize}
+\item $\overline{x}$ ist ein isoliertes lokales Minimum von f.
+\item Die Folge konvergiert ganz gegen $\overline{x}$.
+\item Es gibt ein $l\geq 0$, so dass das Verfahren zum einem Newtonverfahren mit $\sigma=1$ übergeht. Insbesondere ist Alg. Globales Newton-Verfahren q-superlinear konvergent. q-quadratisch, falls die Hessematrix in einer Umgebung von $\overline{x}$ Lipschitz-stetig ist.
+\end{itemize}
+
+\section{Newton-artige Verfahren}
+\textbf{Lokales Newton-artige Verfahren}\\
+Wähle $x_0\in \mathbb{R}^n$, für k=1,...
+\begin{itemize}
+\item Stop falls $F(x_k)=0$
+\item Wähle eine invertierbare Matrix $M_k\in \mathbb{R}^{(n,n)}$
+\item Berechne den Schritt $s_k$ durch Lösen der Gleichung $M_ks_k=-F(x_k)$
+\item Setze $x_{k+1}=x_k+s_{k+1}$.	
+\end{itemize}
+
+
+\textbf{Satz 11.2 (q-superlineare Konvergenz)}\\
+Sei $F\in C^1(\mathbb{R}^n), \overline{x}$ ein Punkt, sodass $F'(\overline{x})$ invertierbar ist. Weiter sei $x_k$ eine Folge, die gegen $\overline{x}$ konvergiert. Es gelte $x_k\neq \overline{x}$ für alle k. Dann sind äquivalent:
+\begin{itemize}
+\item $x_k$ q-superlinear gegen $\overline{x}$ konvergent und es ist $F(\overline{x})=0$
+\item $\|F(x_k)+F'(x_k)(x_{k+1}-x_k)\|=o(\|x_{k+1}-x_k\|)$
+\item $\|F(x_k)+F'(\overline{x})(x_{k+1}-x_k)\|=o(\|x_{k+1}-x_k\|)$
+\end{itemize}
+
+
+\textbf{Lemma 11.3 stetig diffbar folgt Lipschitz}\\
+Sei $F\in C^1(X)$, wobei X kompakt und konvex. Dann ist F auf X L-stetig mit $L=max_{x\in X}\|F'(x)\|$
+\end{document}
+\\
+\\
+\textbf{Korolllar 11.4 (Dennis-Mooré)}\\
+Die Folge $(x_k)$ sei durch ein Newton-Artiges Verfahren erzeugt, $x_k\rightarrow \overline{x}$ und es gelte $F'(\overline{x})$ invertierbar. Dann sind folgende Aussagen äquivalent:
+\begin{itemize}
+\item $x_k$ q-superlinear gegen $\overline{x}$ konvergent und es ist $F(\overline{x})=0$
+\item $\|F(x_k)+F'(x_k)(x_{k+1}-x_k)\|=o(\|x_{k+1}-x_k\|)$
+\item $\|F(x_k)+F'(\overline{x})(x_{k+1}-x_k)\|=o(\|x_{k+1}-x_k\|)$
+\end{itemize}
+\\
+\\
+\section{Newton-Verfahren}\\
+\textbf{Lokales inexaktes Newton-Verfahren}
+\begin{itemize}
+\item Stop falls $F(x_k)=0$,
+\item sonst berechne $F(x_k)s_k=_F(x_k)$, sodass $\|F'(x_k)s_k+F(x_k)\|\leq \eta_k\|F(x_k)\|$ mit $\eta_k$ noch zu wählen.
+\item Setze $x_{k+1}=x_k+s_k$
+\end{itemize}
+\\
+\\
+\textbf{Satz 12.2}\\
+Sei $F\in C^1(\mathbb{R^n,\mathbb{R^n}})$ und $\overline{x}\in \mathbb{R}$ eine Nst. von F, inder $F'(\overline{x})$ invertierbar ist. Dann gibt es $\varepsilon>0, \eta>0$, so dass Folgendes gilt:
+\begin{itemize}
+\item Für $x_0\in B_{\varepsilon}(\overline{x})$ konvergiert die durch das inexakte Newton-Verfahren erzeugte Folge gegen $\overline{x}$ q-linear, falls $\eta_k\leq \eta\in (0,1)$ klein genug.
+\item Gilt zstzl. $\eta_k\rightarrow 0$, so ist die Konvergenz q-superlinear
+\item Gilt $\eta_k=O(\|F(x_k)), F'(x)$ L-stetig auf $B_{\varepsilon}(\overline{x})$, so ist die Konvergenz q-superlinear.
+\\
+\\
+\section{Quasi Newton-verfahren}
+\textbf{Lokale Quasi-Newton-Verfahren}\\
+\begin{itemize}
+\item $x_0\in \mathbb{R}^n, H_0\in \mathbb{R}^{n,n}$,symmetrisch und invertierbar.
+\item Stop falls $\nablaf(x_k)=0$
+\item Berechne $s_k$ durch $H_ks_k=-\nablaf(x_k)$
+\item $x_{k+1}=x_k+s_k$
+\item Berechne eine symm. invertierbare $H_{k+1}\in \mathbb{R}^{n,n}$, $H_{k+1}=H(H_k,x_{k+1}-x_k,\nablaf(x_{k+1})-\nablaf(x_k))$ welche die QNG erfüllt: $H_{k+1}(x_{k+1}-x_k)=\nablaf(x_{k+1}-\nablaf(x_k))$ 
+\end{itemize} 
+\end{itemize}
+  

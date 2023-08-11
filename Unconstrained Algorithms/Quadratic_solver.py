@@ -13,11 +13,16 @@ class conjugate_gradient():
         self.A=A
         self.b=b
 
-    def solve(self, x0):
-        x = np.array(x0)
+    def solve(self, x0=None):
         A=self.A
         b=self.b
         system_size=np.array(A).shape[1]
+        if x0 is None:
+            x=np.ones(system_size)
+        else:
+            x = np.array(x0)
+        
+        
         r = np.matmul(A.T, b - np.matmul(A,x))
         d = r
         delta_new = np.dot(r.T, r)
