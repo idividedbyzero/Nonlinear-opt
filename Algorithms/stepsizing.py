@@ -61,22 +61,23 @@ class Armijo():
 
 class Powellwolfe(Armijo):
 
-    def __init__(self, beta: float=1/2, gamma: float =10**(-2)):
+    def __init__(self, gamma: float =10**(-2), eta: float=2*10**(-2)):
         """Creates an instance of the Powellwolfe stepsizing class and checks for valid parameters
 
         Args:
             beta (float, optional): Value that is used for each iteration. Defaults to 1/2.
             gamma (float, optional): Values that the rhs is multiplied with. Defaults to 10**(-2).
         """
-        self.beta=beta
+        self.eta=eta
         self.gamma=gamma
-        self.check_params()
+        self._check_params()
 
-    def check_params(self):
-        super().check_params()
+    def _check_params(self):
+        self._check_bound(self.gamma, 0, 1/2,"Gamma")
+        self._check_bound(self.eta, 0, self.gamma, "Eta")
 
 
-    def powell(self, x, s):
+    def powell(self, f,df, x, s):
         """
             Algorithm 9.3 in [1]
             Requirements:
@@ -86,13 +87,13 @@ class Powellwolfe(Armijo):
         """
 
         sigma=1
-        if self.armijo_check(x, s, sigma):
-            if self.powell_check(x,s,sigma):
+        if self._armijo_check(f,df, x, s, sigma):
+            if self.powell_check(df, x,s,sigma):
                 return 1
             else:
                 sigma_max=2
                 while True:         
-                    if self.armijo_check( x, s, sigma_max):
+                    if self._armijo_check(f,df,  x, s, sigma_max):
                         sigma_max=2*sigma_max
                         
                     else :
@@ -101,20 +102,20 @@ class Powellwolfe(Armijo):
         else:
             sigma_min=0.5 
             while True:         
-                if self.armijo_check( x, s, sigma_min):
+                if self._armijo_check(f,df,  x, s, sigma_min):
                     sigma_max=2*sigma_min
                     break
                 else :
                     sigma_min=sigma_min*0.5
         while True:
-            if self.powell_check(x, s, sigma_min):
+            if self.powell_check(df, x, s, sigma_min):
                 return sigma_min
             else:
                 sigma=0.5*(sigma_min+sigma_max)
-                if self.armijo_check(x,s, sigma):
+                if self._armijo_check(f,df, x,s, sigma):
                     sigma_min=sigma
                 else:
                     sigma_max=sigma
 
-    def powell_check(self, x, s, sigma):
-        return np.inner(self.df(x+sigma*s), s)>=self.eta*np.inner(self.df(x), s)
+    def powell_check(self,df,  x, s, sigma):
+        return np.inner(df(x+sigma*s), s)>=self.eta*np.inner(df(x), s)
