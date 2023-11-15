@@ -1,6 +1,7 @@
 
 import numpy as np
 
+
 class Armijo():
     """Armijo stepsizing class
     """
@@ -14,14 +15,17 @@ class Armijo():
         """
         self.beta=beta
         self.gamma=gamma
-        self.check_params()
+        self._check_params()
         
 
-    def check_params(self):
+    def _check_params(self):
         """Check the parameters for correctness
         """
-        assert self.beta>0 & self.beta<1, "Beta needs to be between 0 and 1"
-        assert self.gamma>0 & self.gamma<1, "Gamma needs to be between 0 and 1"
+        self._check_bound(self.beta, 0, 1, "Beta")
+        self._check_bound(self.gamma, 0, 1, "Gamma")
+
+    def _check_bound(self, param, lower: float, upper:float, name: str):
+        assert param>lower & param<upper, f"{name} needs to be between {str(lower)} and {str(upper)}"
 
 
     def step(self,f: function, df: function, x:np.ndarray,s: np.ndarray, maxiter: 1000)-> float:
@@ -55,7 +59,7 @@ class Armijo():
         return f(x+sigma*s)-f(x)<= sigma*gamma* np.inner(df(x), s)
     
 
-class Powellwolfe():
+class Powellwolfe(Armijo):
 
     def __init__(self, beta: float=1/2, gamma: float =10**(-2)):
         """Creates an instance of the Powellwolfe stepsizing class and checks for valid parameters
@@ -67,6 +71,10 @@ class Powellwolfe():
         self.beta=beta
         self.gamma=gamma
         self.check_params()
+
+    def check_params(self):
+        super().check_params()
+
 
     def powell(self, x, s):
         """
