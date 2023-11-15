@@ -2,7 +2,7 @@
 #from multiprocessing.reduction import steal_handle
 import numpy as np
 from scipy.linalg import solve
-from ..stepsizing import Armijo
+from ..stepsizing import Armijo, Powellwolfe
 
 
 class unconstrained_opt():
@@ -20,15 +20,22 @@ class unconstrained_opt():
         self.f=f    
         self.df=df
         self.ddf=ddf
-        self.Armijo=Armijo(beta, gamma)
+        self._set_step_sizer(step_size_choice, gamma, beta, eta)
         self.eta=eta
         self.tol=tol
         self.maxiter=maxiter
-        self.step_size_choice=step_size_choice
         self.p=p
         self.alpha=alpha
 
         self.optimizer=optimizer
+
+    def _set_step_sizer(self, step_size_choice, gamma, beta, eta):
+        if step_size_choice=="armijo":
+            self.step_sizer=Armijo(beta, gamma)
+        elif step_size_choice=="powell":
+            self.step_sizer=Powellwolfe(gamma, eta)
+        else:
+            raise Exception(f"Step size choice {step_size_choice} unknown.")
 
     def descent_direction(self, x):
         #TODO implement other
@@ -36,12 +43,7 @@ class unconstrained_opt():
 
 
     def step_size(self, x, s):
-        if self.step_size_choice=="armijo":
-            return self.Armijo.step(self.f, self.df, x, s)
-        elif self.step_size_choice=="powell":
-            return self.powell(x,s)
-        else:   #constant
-            return 0.1
+        return self.step_sizer.step(self.f, self.df, x,s, self.maxiter)
 
     def angle_test(self,dfx,dk):
         return -np.inner(dfx, dk)>=min(self.alpha[0], self.alpha[1]* np.linalg.norm(dk)**self.p)*np.linalg.norm(dk)**2

@@ -77,7 +77,7 @@ class Powellwolfe(Armijo):
         self._check_bound(self.eta, 0, self.gamma, "Eta")
 
 
-    def powell(self, f,df, x, s):
+    def step(self, f,df, x, s):
         """
             Algorithm 9.3 in [1]
             Requirements:
@@ -118,4 +118,6 @@ class Powellwolfe(Armijo):
                     sigma_max=sigma
 
     def powell_check(self,df,  x, s, sigma):
+        """Checks condition (9.25) from the book
+        """
         return np.inner(df(x+sigma*s), s)>=self.eta*np.inner(df(x), s)
