@@ -25,7 +25,7 @@ class Armijo():
         self._check_bound(self.gamma, 0, 1, "Gamma")
 
     def _check_bound(self, param, lower: float, upper:float, name: str):
-        assert param>lower & param<upper, f"{name} needs to be between {str(lower)} and {str(upper)}"
+        assert param>lower and param<upper, f"{name} needs to be between {str(lower)} and {str(upper)}"
 
 
     def step(self,f, df, x:np.ndarray,s: np.ndarray, maxiter: 1000)-> float:
