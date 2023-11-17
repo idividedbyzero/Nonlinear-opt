@@ -2,7 +2,29 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-from helper_funcs import create_box_grid
+from src.utils.helper_funcs import create_box_grid
+
+def plot_level_sets_and_points(points:np.ndarray, scalar_field, filename: str="plots/misc/test.png"):
+    x = np.linspace(min(points[:, 0]) - 1, max(points[:, 0]) + 1, 100)
+    y = np.linspace(min(points[:, 1]) - 1, max(points[:, 1]) + 1, 100)
+    X, Y = np.meshgrid(x, y)
+
+    # Plot level sets
+    plt.contour(X, Y, scalar_field(np.stack((X, Y), axis=0)), cmap='viridis')
+
+    # Scatter plot for points
+    plt.plot(points[:, 0], points[:, 1], color='red', label='Points')
+    for i, (x, y) in enumerate(points):
+        plt.text(x, y, f'{i+1}', color='black', fontsize=8, ha='center', va='center')
+
+
+    plt.xlabel('X-axis')
+    plt.ylabel('Y-axis')
+    plt.title('Level Sets and Points')
+    plt.legend()
+    plt.grid(True)
+    plt.savefig(filename)
+
 
 def surface_plot(X, Y, Z, ax=None, cmap="viridis", save=None):
     """
@@ -44,7 +66,7 @@ def contour(X, Y, Z, ax=None, cmap="viridis", save=None):
         plt.savefig(save)
     return ax
 
-def add_iterates_contout(points, ax=None):
+def add_iterates_contour(points, ax=None):
     # Create a list of plot data for random points
     random_point_data = [{'position': point, 'marker': 'x',"color": "blue",  'markersize': 8, 'label': 'Random Point'} for point in points[:-1]]
     random_point_data.append({'position': points[-1], 'marker': 'x', 'color': 'red', 'markersize': 8, 'label': 'Last Point'})
@@ -55,25 +77,25 @@ def add_iterates_contout(points, ax=None):
         ax.plot(position[0], position[1], **data)
     return ax
 
-# Define a function to generate Z values
-def f(x, y):
-    return x**2-y**2
+# # Define a function to generate Z values
+# def f(x, y):
+#     return x**2-y**2
 
-def g(x, y):
-    return x**2+y**2
+# def g(x, y):
+#     return x**2+y**2
 
-X, Y=create_box_grid(-1, 1, 100)
+# X, Y=create_box_grid(-1, 1, 100)
 
-funcs=[f,g]
-Z=f(X,Y)
-save="plots/contour_plot.jpg"
-ax=contour(X, Y, Z, ax=None, cmap="viridis")
+# funcs=[f,g]
+# Z=f(X,Y)
+# save="plots/contour_plot.jpg"
+# ax=contour(X, Y, Z, ax=None, cmap="viridis")
 
-num_random_points = 5
-random_points = np.random.rand(num_random_points, 2)
-ax=add_iterates_contout(random_points, ax=ax)
+# num_random_points = 5
+# random_points = np.random.rand(num_random_points, 2)
+# ax=add_iterates_contour(random_points, ax=ax)
 
-plt.savefig(save)
+# plt.savefig(save)
 
 
 # for i, func in enumerate(funcs):

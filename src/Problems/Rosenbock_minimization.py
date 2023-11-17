@@ -1,7 +1,7 @@
 #from Algorithms import Unconstrained_Algorithms
 #from . import *
 #from Gradient_Descent import unconstrained_opt
-from src.Algorithms.Unconstrained_Algorithms.Gradient_Descent import unconstrained_opt
+from src.Algorithms.Unconstrained_Algorithms.Gradient_Descent import Gradient_Descent, Newton
 import numpy as np
 import logging
 
@@ -15,12 +15,17 @@ def ddRosenbock(x):
 
 
 if __name__=="__main__":
-    solver=unconstrained_opt(Rosenbock,dRosenbock, maxiter=100000)
+    
+    solver=Gradient_Descent(Rosenbock,dRosenbock, maxiter=100000)
     logging.info("Optimizing with Gradient descent")
     solver.solve(np.array([-1.2, 1]))
-
-    solver=unconstrained_opt(Rosenbock,dRosenbock, ddRosenbock, optimizer="Newton")
+    solver.plot_level_sets_and_points()
+    
+    solver=Newton(Rosenbock,dRosenbock, ddRosenbock)
     logging.info("Optimizing with Newton's method")
     solver.solve(np.array([-1.2,1]))
 
+    import matplotlib.pyplot as plt
+    plt.clf()
+    solver.plot_level_sets_and_points()
     logging.info("Finished all optimization processes")
