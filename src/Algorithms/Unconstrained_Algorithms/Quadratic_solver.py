@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 
 class conjugate_gradient():
     """
@@ -13,21 +14,17 @@ class conjugate_gradient():
         self.A=A
         self.b=b
 
-    def solve(self, x0=None):
+    def solve(self, x0: np.ndarray, maxiter:int=sys.maxint):
         A=self.A
         b=self.b
-        system_size=np.array(A).shape[1]
-        if x0 is None:
-            x=np.ones(system_size)
-        else:
-            x = np.array(x0)
-        
+        system_size=np.array(A).shape[1] 
+        maxiter=min(maxiter, system_size)       
         
         r = np.matmul(A.T, b - np.matmul(A,x))
         d = r
         delta_new = np.dot(r.T, r)
 
-        for i in range(system_size):
+        for _ in range(maxiter):
 
             # compute alpha_k
             # <Ad,Ad>
