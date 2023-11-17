@@ -26,3 +26,11 @@ def create_box_grid(min: float, max: float, fine:int):
 
 def unit_mesh_grid(fine=100):
     return create_box_grid(0, 1, fine)
+
+
+def generateSPDmatrix(n):
+    A = np.random.rand(n,n) 
+    A = 0.5* (A+A.T)
+    
+    A = A + n*np.eye(n)
+    return A

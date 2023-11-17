@@ -28,7 +28,7 @@ class Armijo():
         assert param>lower & param<upper, f"{name} needs to be between {str(lower)} and {str(upper)}"
 
 
-    def step(self,f: function, df: function, x:np.ndarray,s: np.ndarray, maxiter: 1000)-> float:
+    def step(self,f, df, x:np.ndarray,s: np.ndarray, maxiter: 1000)-> float:
         """Finds the next armijo step from a given point in the given direction
 
         Args:

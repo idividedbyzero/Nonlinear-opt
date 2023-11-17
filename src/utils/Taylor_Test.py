@@ -39,13 +39,13 @@ def taylor_test(f, df, ddf, x, h, order =1):
     return np.median(convergence_rates(residuals, epsilons))
 	
 	
-def convergence_rates(E_values, eps_values, show=True):
-	from numpy import log
+def convergence_rates(E_values, eps_values, verbose=True):
+	
 	r = []
 	for i in range(1, len(eps_values)):
-		r.append(log(E_values[i] / E_values[i - 1])
-		/ log(eps_values[i] / eps_values[i - 1]))
-	if show:
+		r.append(np.log(E_values[i] / E_values[i - 1])
+		/ np.log(eps_values[i] / eps_values[i - 1]))
+	if verbose:
 		print("Computed convergence rates: {}".format(r))
 	return r
 
