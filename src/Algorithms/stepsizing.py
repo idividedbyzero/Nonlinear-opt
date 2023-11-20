@@ -74,7 +74,7 @@ class Powellwolfe(Armijo):
 
     def _check_params(self):
         self._check_bound(self.gamma, 0, 1/2,"Gamma")
-        self._check_bound(self.eta, 0, self.gamma, "Eta")
+        self._check_bound(self.eta, self.gamma, 1, "Eta")
 
 
     def step(self, f,df, x, s):
