@@ -1,0 +1,9 @@
+T: 300
+x0: 0
+v0: 0
+vdes: 30
+gmin: 0
+gmax: 3
+bmin: 0
+bmax: 5
+nsteps: 150
