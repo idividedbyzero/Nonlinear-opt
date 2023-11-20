@@ -2,9 +2,10 @@
 #from multiprocessing.reduction import steal_handle
 import numpy as np
 from scipy.linalg import solve
-from ..stepsizing import Armijo
+from ..stepsizing import Armijo, Powellwolfe
 from src.utils.ploting import plot_level_sets_and_points
 from typing import List
+
 
 class general_descent_method():
     def __init__(self, f,df, maxiter: int=100000, tol:float =10**-9):
@@ -19,25 +20,33 @@ class general_descent_method():
 
     def step_size(self, x, s):
         pass
-    
+
+    def _make_iteration(self, x)->np.ndarray:
+        sk=self.descent_direction(x)
+        sigmak=self.step_size(x,sk)
+        x=x+sigmak*sk
+        return x
+
+    def _check_convergence(self, x:np.ndarray, i: int)->bool:
+        fx=self.f(x)
+        dfx=self.df(x)
+        norm_dfx=np.linalg.norm(dfx)
+        print("Iteration: {:d}, Function value: {:1.5}, Norm of the gradient: {:1.8}".format(i, float(fx), norm_dfx))
+            
+        if norm_dfx<self.tol:
+            print("Solver Converged!")
+            return True
+        else:
+            return False
+
     def solve(self, x0:np.ndarray)-> np.ndarray:
             xs=[]
             x=np.array(x0)        
-            for i in range(self.maxiter):
+            for k in range(self.maxiter):
                 xs.append(x)
-                fx=self.f(x)
-                dfx=self.df(x)
-                norm_dfx=np.linalg.norm(dfx)
-                if norm_dfx<self.tol:
-                    print("Iteration: {:d}, Function value: {:1.5}, Norm of the gradient: {:1.8}".format(i, float(fx), norm_dfx))
-                    print("Solver Converged!")
-                    xs.append(x)
-                    self.xs=np.array(xs)
-                    return xs
-                sk=self.descent_direction(x)
-                sigmak=self.step_size(x,sk)
-                x=x+sigmak*sk
-                print("Iteration: {:d}, Function value: {:1.5}, Norm of the gradient: {:1.8}".format(i, float(fx), norm_dfx))
+                if self._check_convergence(x, k):
+                    return np.array(xs)
+                x=self._make_iteration(x)
             print("Solver stopped with maxiteration!")
             self.xs=np.array(xs)
             return xs
@@ -84,7 +93,7 @@ class Newton(general_descent_method):
         assert not self.ddf is None, "No second derivative was given"
         dfx=self.df(x)
         ddfx=self.ddf(x)
-        dk=solve(ddfx,-dfx, assume_a="sym")    #hessian is always symmetric     
+        dk=solve(ddfx,-dfx, assume_a="sym")    #hessian is always symmetric  
         if self._angle_test:
             sk=dk
         else:
@@ -97,7 +106,34 @@ class Newton(general_descent_method):
     def plot_level_sets_and_points(self, filename: str = "plots/misc/newtonmethod.png"):
         return super().plot_level_sets_and_points(filename)
 
+class BFGS(general_descent_method):
+    #TODO test rosenbock case doesn't work yet
+    def __init__(self, f, df, maxiter: int = 100000, tol: float = 10 ** -9, gamma:float =1/4, eta:float=1/2, B=None):
+        super().__init__(f, df, maxiter, tol)
+        self.gamma=gamma
+        self.eta=eta
+        self.B=B
 
+    def descent_direction(self, x):
+        return -np.dot(self.B, self.df(x))
+    
+    def step_size(self, x, s):
+        powel=Powellwolfe(self.gamma, self.eta)
+        return powel.step(self.f, self.df, x, s)
+    
+    def _make_iteration(self, x):
+        B=self.B
+        x_old=x.copy()
+        x=super()._make_iteration(x)
+        d=x-x_old
+        y=self.df(x)-self.df(x_old)
+        if B is None:
+            B=np.eye(len(x))
+        e=d-np.dot(B, y)
+        inner=np.inner(d, y)
+        eps=10**-9
+        self.B=B+(np.outer(e, d)+np.outer(d, e))/(inner+eps)-np.inner(e,d)/(inner**2+eps)*np.outer(d,d)
+        return x
 
 # class unconstrained_opt():
 #     """
